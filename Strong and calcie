@@ -1,0 +1,163 @@
+// strong number
+
+
+<?php
+function factorial($n) {
+    $fact = 1;
+    for ($i = 1; $i <= $n; $i++) {
+        $fact *= $i;
+    }
+    return $fact;
+}
+
+function isStrongNumber($num) {
+    $sum = 0;
+    $originalNum = $num;
+
+    while ($num > 0) {
+        $digit = $num % 10;
+        $sum += factorial($digit);
+        $num = intval($num / 10);
+    }
+
+    return $sum == $originalNum;
+}
+
+// Test the function
+$number = 145;
+if (isStrongNumber($number)) {
+    echo "$number is a Strong Number.";
+} else {
+    echo "$number is not a Strong Number.";
+}
+?>
+
+
+// calculator in laravel
+
+Steps to Create a Calculator in Laravel
+Set Up Laravel Project
+Create a Laravel project if you don't have one:
+
+bash
+Copy code
+composer create-project laravel/laravel CalculatorApp
+cd CalculatorApp
+php artisan serve
+Create a Controller
+Generate a controller for handling calculator logic:
+
+bash
+Copy code
+php artisan make:controller CalculatorController
+Define Routes
+Add routes for the calculator in routes/web.php:
+
+php
+Copy code
+use App\Http\Controllers\CalculatorController;
+
+Route::get('/calculator', [CalculatorController::class, 'index']);
+Route::post('/calculator', [CalculatorController::class, 'calculate']);
+Create Controller Methods
+Edit CalculatorController.php to include methods for displaying the form and processing the calculation:
+
+php
+Copy code
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class CalculatorController extends Controller
+{
+    public function index()
+    {
+        return view('calculator');
+    }
+
+    public function calculate(Request $request)
+    {
+        $request->validate([
+            'number1' => 'required|numeric',
+            'number2' => 'required|numeric',
+            'operation' => 'required|string',
+        ]);
+
+        $num1 = $request->input('number1');
+        $num2 = $request->input('number2');
+        $operation = $request->input('operation');
+        $result = 0;
+
+        switch ($operation) {
+            case 'add':
+                $result = $num1 + $num2;
+                break;
+            case 'subtract':
+                $result = $num1 - $num2;
+                break;
+            case 'multiply':
+                $result = $num1 * $num2;
+                break;
+            case 'divide':
+                if ($num2 != 0) {
+                    $result = $num1 / $num2;
+                } else {
+                    return back()->withErrors(['message' => 'Division by zero is not allowed']);
+                }
+                break;
+            default:
+                return back()->withErrors(['message' => 'Invalid operation']);
+        }
+
+        return view('calculator', ['result' => $result]);
+    }
+}
+Create a View
+Create a Blade view in resources/views/calculator.blade.php:
+
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+</head>
+<body>
+    <h1>Simple Calculator</h1>
+    <form action="/calculator" method="POST">
+        @csrf
+        <input type="number" name="number1" placeholder="Enter first number" required>
+        <select name="operation" required>
+            <option value="add">Add</option>
+            <option value="subtract">Subtract</option>
+            <option value="multiply">Multiply</option>
+            <option value="divide">Divide</option>
+        </select>
+        <input type="number" name="number2" placeholder="Enter second number" required>
+        <button type="submit">Calculate</button>
+    </form>
+
+    @if ($errors->any())
+        <div style="color: red;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @isset($result)
+        <h2>Result: {{ $result }}</h2>
+    @endisset
+</body>
+</html>
+Run the Application
+Start the Laravel development server:
+
+bash
+Copy code
+php artisan serve
+Visit http://127.0.0.1:8000/calculator in your browser.
